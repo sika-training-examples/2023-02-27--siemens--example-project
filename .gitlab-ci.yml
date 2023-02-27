@@ -1,0 +1,35 @@
+image: sikalabs/ci
+
+stages:
+  - build
+
+variables:
+  GIT_CLEAN_FLAGS: -ffdx -e .yarn-cache .next .kaniko-cache
+
+build:
+  image: node:16-slim
+  stage: build
+  script:
+    - yarn install --frozen-lockfile --cache-folder .yarn-cache --prefer-offline
+    - yarn run build
+  artifacts:
+    paths:
+      - out
+    expire_in: 1 week
+
+build docker:
+  stage: build
+  image:
+    name: gcr.io/kaniko-project/executor:v1.9.0-debug
+    entrypoint: [""]
+  script:
+    - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
+    - /kaniko/executor
+      --context .
+      --dockerfile ./Dockerfile
+      --destination $CI_REGISTRY_IMAGE
+      --destination $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
+      --destination $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG-$CI_COMMIT_SHORT_SHA-$CI_PIPELINE_ID
+      --cache=true
+      --cache-dir .kaniko-cache
+      --cache-repo $CI_REGISTRY_IMAGE/cache
