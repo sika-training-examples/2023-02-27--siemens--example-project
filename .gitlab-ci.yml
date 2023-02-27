@@ -8,6 +8,7 @@ variables:
   GIT_CLEAN_FLAGS: -ffdx -e .yarn-cache .next .kaniko-cache
 
 eslint:
+  image: node:16-slim
   stage: lint
   script:
     - yarn install --frozen-lockfile --cache-folder .yarn-cache --prefer-offline
