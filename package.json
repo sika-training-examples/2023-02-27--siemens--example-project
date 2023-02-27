@@ -7,12 +7,15 @@
   "private": true,
   "dependencies": {
     "next": "^13.2.1",
+    "prettier": "^2.8.4",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
   "scripts": {
     "build": "next build && next export",
-    "lint": "next lint"
+    "lint": "next lint",
+    "prettier-check": "prettier -l .",
+    "prettier-write": "prettier --write ."
   },
   "devDependencies": {
     "eslint": "8.35.0",
