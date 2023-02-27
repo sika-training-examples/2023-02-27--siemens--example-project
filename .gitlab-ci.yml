@@ -6,6 +6,8 @@ stages:
   - build-docker
   - deploy-dev
   - deploy-dev-check
+  - deploy-prod
+  - deploy-prod-check
 
 variables:
   GIT_CLEAN_FLAGS: -ffdx -e .yarn-cache .next .kaniko-cache
@@ -93,3 +95,22 @@ deploy dev check:
     - if: $CI_COMMIT_BRANCH
   script:
     - curl https://$CI_PROJECT_PATH_SLUG-$CI_COMMIT_REF_SLUG.$BASE_DOMAIN
+
+deploy prod:
+  stage: deploy-prod
+  extends: .deploy
+  rules:
+    - if: $CI_COMMIT_TAG
+  variables:
+    IMAGE: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG-$CI_COMMIT_SHORT_SHA-$CI_PIPELINE_ID
+    HOST: $BASE_DOMAIN
+  environment:
+    name: prod
+    url: https://$BASE_DOMAIN
+
+deploy prod check:
+  stage: deploy-prod-check
+  rules:
+    - if: $CI_COMMIT_TAG
+  script:
+    - curl https://$BASE_DOMAIN
