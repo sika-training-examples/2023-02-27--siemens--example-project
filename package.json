@@ -11,6 +11,11 @@
     "react-dom": "^18.2.0"
   },
   "scripts": {
-    "build": "next build && next export"
+    "build": "next build && next export",
+    "lint": "next lint"
+  },
+  "devDependencies": {
+    "eslint": "8.35.0",
+    "eslint-config-next": "13.2.1"
   }
 }
