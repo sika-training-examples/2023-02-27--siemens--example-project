@@ -52,19 +52,24 @@ build docker:
       --cache-dir .kaniko-cache
       --cache-repo $CI_REGISTRY_IMAGE/cache
 
-deploy dev:
-  stage: deploy-dev
-  rules:
-    - if: $CI_COMMIT_BRANCH
+.deploy:
   script:
     - helm upgrade --install $CI_PROJECT_PATH_SLUG-$CI_COMMIT_REF_SLUG
       one-image --repo https://helm.sikalabs.io
       --namespace $CI_PROJECT_PATH_SLUG-$CI_COMMIT_REF_SLUG
       --create-namespace
-      --set image=$CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG-$CI_COMMIT_SHORT_SHA-$CI_PIPELINE_ID
-      --set host=$CI_PROJECT_PATH_SLUG-$CI_COMMIT_REF_SLUG.$BASE_DOMAIN
-    - slu wait-for tls -a $CI_PROJECT_PATH_SLUG-$CI_COMMIT_REF_SLUG.$BASE_DOMAIN:443
+      --set image=$IMAGE
+      --set host=$HOST
+    - slu wait-for tls -a $HOST:443
 
+deploy dev:
+  stage: deploy-dev
+  extends: .deploy
+  rules:
+    - if: $CI_COMMIT_BRANCH
+  variables:
+    IMAGE: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG-$CI_COMMIT_SHORT_SHA-$CI_PIPELINE_ID
+    HOST: $CI_PROJECT_PATH_SLUG-$CI_COMMIT_REF_SLUG.$BASE_DOMAIN
   environment:
     name: dev/$CI_COMMIT_REF_SLUG
     url: https://$CI_PROJECT_PATH_SLUG-$CI_COMMIT_REF_SLUG.$BASE_DOMAIN
