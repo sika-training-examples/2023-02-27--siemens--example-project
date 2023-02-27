@@ -2,7 +2,8 @@ image: sikalabs/ci
 
 stages:
   - lint
-  - build
+  - build-js
+  - build-docker
 
 variables:
   GIT_CLEAN_FLAGS: -ffdx -e .yarn-cache .next .kaniko-cache
@@ -14,9 +15,9 @@ eslint:
     - yarn install --frozen-lockfile --cache-folder .yarn-cache --prefer-offline
     - yarn run lint
 
-build:
+build js:
   image: node:16-slim
-  stage: build
+  stage: build-js
   script:
     - yarn install --frozen-lockfile --cache-folder .yarn-cache --prefer-offline
     - yarn run build
@@ -26,7 +27,7 @@ build:
     expire_in: 1 week
 
 build docker:
-  stage: build
+  stage: build-docker
   image:
     name: gcr.io/kaniko-project/executor:v1.9.0-debug
     entrypoint: [""]
