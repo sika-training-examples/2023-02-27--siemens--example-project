@@ -4,6 +4,7 @@ stages:
   - lint
   - build-js
   - build-docker
+  - deploy-dev
 
 variables:
   GIT_CLEAN_FLAGS: -ffdx -e .yarn-cache .next .kaniko-cache
@@ -42,3 +43,31 @@ build docker:
       --cache=true
       --cache-dir .kaniko-cache
       --cache-repo $CI_REGISTRY_IMAGE/cache
+
+deploy dev:
+  stage: deploy-dev
+  rules:
+    - if: $CI_COMMIT_BRANCH
+  script:
+    - helm upgrade --install $CI_PROJECT_PATH_SLUG-$CI_COMMIT_REF_SLUG
+      one-image --repo https://helm.sikalabs.io
+      --namespace $CI_PROJECT_PATH_SLUG-$CI_COMMIT_REF_SLUG
+      --create-namespace
+      --set image=$CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG-$CI_COMMIT_SHORT_SHA-$CI_PIPELINE_ID
+      --set host=$CI_PROJECT_PATH_SLUG-$CI_COMMIT_REF_SLUG.$BASE_DOMAIN
+  environment:
+    name: dev/$CI_COMMIT_REF_SLUG
+    url: https://$CI_PROJECT_PATH_SLUG-$CI_COMMIT_REF_SLUG.$BASE_DOMAIN
+    on_stop: stop dev
+
+stop dev:
+  stage: deploy-dev
+  when: manual
+  variables:
+    GIT_STRATEGY: none
+  environment:
+    name: dev/$CI_COMMIT_REF_SLUG
+    action: stop
+  script:
+    - helm uninstall $CI_PROJECT_PATH_SLUG-$CI_COMMIT_REF_SLUG
+      --namespace $CI_PROJECT_PATH_SLUG-$CI_COMMIT_REF_SLUG
