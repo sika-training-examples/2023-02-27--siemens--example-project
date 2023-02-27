@@ -80,6 +80,8 @@ deploy dev:
 stop dev:
   stage: deploy-dev
   when: manual
+  rules:
+    - if: $CI_COMMIT_BRANCH
   variables:
     GIT_STRATEGY: none
   environment:
