@@ -17,6 +17,13 @@ eslint:
     - yarn install --frozen-lockfile --cache-folder .yarn-cache --prefer-offline
     - yarn run lint
 
+prettier:
+  image: node:16-slim
+  stage: lint
+  script:
+    - yarn install --frozen-lockfile --cache-folder .yarn-cache --prefer-offline
+    - yarn run prettier-check
+
 build js:
   image: node:16-slim
   stage: build-js
