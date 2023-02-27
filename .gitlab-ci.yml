@@ -5,6 +5,7 @@ stages:
   - build-js
   - build-docker
   - deploy-dev
+  - deploy-dev-check
 
 variables:
   GIT_CLEAN_FLAGS: -ffdx -e .yarn-cache .next .kaniko-cache
@@ -55,6 +56,8 @@ deploy dev:
       --create-namespace
       --set image=$CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG-$CI_COMMIT_SHORT_SHA-$CI_PIPELINE_ID
       --set host=$CI_PROJECT_PATH_SLUG-$CI_COMMIT_REF_SLUG.$BASE_DOMAIN
+    - slu wait-for tls -a $CI_PROJECT_PATH_SLUG-$CI_COMMIT_REF_SLUG.$BASE_DOMAIN:443
+
   environment:
     name: dev/$CI_COMMIT_REF_SLUG
     url: https://$CI_PROJECT_PATH_SLUG-$CI_COMMIT_REF_SLUG.$BASE_DOMAIN
@@ -71,3 +74,10 @@ stop dev:
   script:
     - helm uninstall $CI_PROJECT_PATH_SLUG-$CI_COMMIT_REF_SLUG
       --namespace $CI_PROJECT_PATH_SLUG-$CI_COMMIT_REF_SLUG
+
+deploy dev check:
+  stage: deploy-dev-check
+  rules:
+    - if: $CI_COMMIT_BRANCH
+  script:
+    - curl https://$CI_PROJECT_PATH_SLUG-$CI_COMMIT_REF_SLUG.$BASE_DOMAIN
