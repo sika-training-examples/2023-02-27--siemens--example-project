@@ -4,5 +4,13 @@
   "repository": "git@gitlab.sikademo.com:example/hello-world.git",
   "author": "Ondrej Sika <ondrej@ondrejsika.com>",
   "license": "MIT",
-  "private": true
+  "private": true,
+  "dependencies": {
+    "next": "^13.2.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "scripts": {
+    "build": "next build && next export"
+  }
 }
